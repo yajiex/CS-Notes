@@ -50,10 +50,12 @@
 
 [Leetcode](https://leetcode.com/problems/maximum-depth-of-binary-tree/description/) / [力扣](https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/description/)
 
-```java
-public int maxDepth(TreeNode root) {
-    if (root == null) return 0;
-    return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+```cpp
+int maxDepth(TreeNode* root) {
+    if (!root) {
+        return 0;
+    }
+    return max(maxDepth(root->left), maxDepth(root->right)) + 1;
 }
 ```
 
@@ -73,21 +75,26 @@ public int maxDepth(TreeNode root) {
 
 平衡树左右子树高度差都小于等于 1
 
-```java
-private boolean result = true;
+```cpp
+public:
+    bool isBalanced(TreeNode* root) {
+        dfs(root);
+        return result;
+    }
 
-public boolean isBalanced(TreeNode root) {
-    maxDepth(root);
-    return result;
-}
-
-public int maxDepth(TreeNode root) {
-    if (root == null) return 0;
-    int l = maxDepth(root.left);
-    int r = maxDepth(root.right);
-    if (Math.abs(l - r) > 1) result = false;
-    return 1 + Math.max(l, r);
-}
+private:
+    int dfs(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        int l = dfs(root->left);
+        int r = dfs(root->right);
+        if (abs(l-r) > 1) {
+            result = false;
+        }
+        return max(l, r) + 1;
+    }
+    bool result = true;
 ```
 
 ### 3. 两节点的最长路径
@@ -108,21 +115,24 @@ Input:
 Return 3, which is the length of the path [4,2,1,3] or [5,2,1,3].
 ```
 
-```java
-private int max = 0;
-
-public int diameterOfBinaryTree(TreeNode root) {
-    depth(root);
-    return max;
-}
-
-private int depth(TreeNode root) {
-    if (root == null) return 0;
-    int leftDepth = depth(root.left);
-    int rightDepth = depth(root.right);
-    max = Math.max(max, leftDepth + rightDepth);
-    return Math.max(leftDepth, rightDepth) + 1;
-}
+```cpp
+public:
+    int diameterOfBinaryTree(TreeNode* root) {
+        dfs(root);
+        return ans;
+    }
+    
+private:
+    int ans = 0;
+    int dfs(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        int l = dfs(root->left);
+        int r = dfs(root->right);
+        ans = max(l+r, ans);
+        return max(l, r) + 1;
+    }
 ```
 
 ### 4. 翻转树
@@ -131,14 +141,17 @@ private int depth(TreeNode root) {
 
 [Leetcode](https://leetcode.com/problems/invert-binary-tree/description/) / [力扣](https://leetcode-cn.com/problems/invert-binary-tree/description/)
 
-```java
-public TreeNode invertTree(TreeNode root) {
-    if (root == null) return null;
-    TreeNode left = root.left;  // 后面的操作会改变 left 指针，因此先保存下来
-    root.left = invertTree(root.right);
-    root.right = invertTree(left);
-    return root;
-}
+```cpp
+public:
+    TreeNode* invertTree(TreeNode* root) {
+        if (!root) {
+            return root;
+        }
+        auto tmp = root->left;
+        root->left = invertTree(root->right);
+        root->right = invertTree(tmp);
+        return root;
+    }
 ```
 
 ### 5. 归并两棵树
@@ -164,16 +177,22 @@ Output:
      5   4   7
 ```
 
-```java
-public TreeNode mergeTrees(TreeNode t1, TreeNode t2) {
-    if (t1 == null && t2 == null) return null;
-    if (t1 == null) return t2;
-    if (t2 == null) return t1;
-    TreeNode root = new TreeNode(t1.val + t2.val);
-    root.left = mergeTrees(t1.left, t2.left);
-    root.right = mergeTrees(t1.right, t2.right);
-    return root;
-}
+```cpp
+public:
+    TreeNode* mergeTrees(TreeNode* root1, TreeNode* root2) {
+        if (!root1 && !root2) {
+            return nullptr;
+        } else if (!root1) {
+            return root2;
+        } else if(!root2) {
+            return root1;
+        } else {
+            auto root = new TreeNode(root1->val + root2->val);
+            root->left = mergeTrees(root1->left, root2->left);
+            root->right = mergeTrees(root1->right, root2->right);
+            return root;
+        }
+    }
 ```
 
 ### 6. 判断路径和是否等于一个数
@@ -198,12 +217,19 @@ return true, as there exist a root-to-leaf path 5->4->11->2 which sum is 22.
 
 路径和定义为从 root 到 leaf 的所有节点的和。
 
-```java
-public boolean hasPathSum(TreeNode root, int sum) {
-    if (root == null) return false;
-    if (root.left == null && root.right == null && root.val == sum) return true;
-    return hasPathSum(root.left, sum - root.val) || hasPathSum(root.right, sum - root.val);
-}
+```cpp
+public:
+    bool hasPathSum(TreeNode* root, int targetSum) {
+        if (!root) {
+            return false;
+        } else if (!root->left && !root->right && targetSum == root->val) {
+            return true;
+        } else {
+            auto ans1 = root->left ? hasPathSum(root->left, targetSum - root->val) : false;
+            auto ans2 = root->right ? hasPathSum(root->right, targetSum - root->val) : false;
+            return ans1 || ans2;
+        }
+    }
 ```
 
 ### 7. 统计路径和等于一个数的路径数量
@@ -232,20 +258,27 @@ Return 3. The paths that sum to 8 are:
 
 路径不一定以 root 开头，也不一定以 leaf 结尾，但是必须连续。
 
-```java
-public int pathSum(TreeNode root, int sum) {
-    if (root == null) return 0;
-    int ret = pathSumStartWithRoot(root, sum) + pathSum(root.left, sum) + pathSum(root.right, sum);
-    return ret;
-}
+```cpp
+public:
+    int pathSum(TreeNode* root, int sum) {
+        if (!root) {
+            return 0;
+        }
+        return dfs(root, sum) + pathSum(root->left, sum) + pathSum(root->right, sum);
+    }
 
-private int pathSumStartWithRoot(TreeNode root, int sum) {
-    if (root == null) return 0;
-    int ret = 0;
-    if (root.val == sum) ret++;
-    ret += pathSumStartWithRoot(root.left, sum - root.val) + pathSumStartWithRoot(root.right, sum - root.val);
-    return ret;
-}
+private:
+    int dfs(TreeNode* root, int sum) {
+        if (!root) {
+            return 0;
+        }
+        auto ans = 0;
+        if (sum == root->val) {
+            ans ++;
+        }
+        ans += dfs(root->left, sum - root->val) + dfs(root->right, sum - root->val);
+        return ans;
+    }
 ```
 
 ### 8. 子树
@@ -287,18 +320,25 @@ Given tree t:
 Return false.
 ```
 
-```java
-public boolean isSubtree(TreeNode s, TreeNode t) {
-    if (s == null) return false;
-    return isSubtreeWithRoot(s, t) || isSubtree(s.left, t) || isSubtree(s.right, t);
-}
+```cpp
+public:
+    bool isSubtree(TreeNode* s, TreeNode* t) {
+        if (!s) {
+            return !t;
+        }
+        return isSubtree(s->left, t) || isSubtree(s->right, t) || dfs(s, t);
+    }
 
-private boolean isSubtreeWithRoot(TreeNode s, TreeNode t) {
-    if (t == null && s == null) return true;
-    if (t == null || s == null) return false;
-    if (t.val != s.val) return false;
-    return isSubtreeWithRoot(s.left, t.left) && isSubtreeWithRoot(s.right, t.right);
-}
+private:
+    bool dfs(TreeNode* s, TreeNode* t) {
+        if(!s && !t) {
+            return true;
+        } else if(s && t) {
+            return s->val == t->val && dfs(s->left, t->left) && dfs(s->right, t->right);
+        } else {
+            return false;
+        }
+    }
 ```
 
 ### 9. 树的对称
@@ -315,18 +355,25 @@ private boolean isSubtreeWithRoot(TreeNode s, TreeNode t) {
 3  4 4  3
 ```
 
-```java
-public boolean isSymmetric(TreeNode root) {
-    if (root == null) return true;
-    return isSymmetric(root.left, root.right);
-}
+```cpp
+public:
+    bool isSymmetric(TreeNode* root) {
+        if (!root) {
+            return true;
+        }
+        return dfs(root->left, root->right);
+    }
 
-private boolean isSymmetric(TreeNode t1, TreeNode t2) {
-    if (t1 == null && t2 == null) return true;
-    if (t1 == null || t2 == null) return false;
-    if (t1.val != t2.val) return false;
-    return isSymmetric(t1.left, t2.right) && isSymmetric(t1.right, t2.left);
-}
+private:
+    bool dfs(TreeNode* s, TreeNode* t) {
+        if (!s && !t) {
+            return true;
+        } else if (s && t) {
+            return s->val == t->val && dfs(s->left, t->right) && dfs(s->right, t->left);
+        } else {
+            return false;
+        }
+    }
 ```
 
 ### 10. 最小路径
@@ -337,14 +384,20 @@ private boolean isSymmetric(TreeNode t1, TreeNode t2) {
 
 树的根节点到叶子节点的最小路径长度
 
-```java
-public int minDepth(TreeNode root) {
-    if (root == null) return 0;
-    int left = minDepth(root.left);
-    int right = minDepth(root.right);
-    if (left == 0 || right == 0) return left + right + 1;
-    return Math.min(left, right) + 1;
-}
+```cpp
+public:
+    int minDepth(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        auto l = minDepth(root->left);
+        auto r = minDepth(root->right);
+        if (l == 0 || r == 0) {
+            return l + r + 1;
+        } else {
+            return min(l, r) + 1;
+        }
+    }
 ```
 
 ### 11. 统计左叶子节点的和
@@ -363,17 +416,18 @@ public int minDepth(TreeNode root) {
 There are two left leaves in the binary tree, with values 9 and 15 respectively. Return 24.
 ```
 
-```java
-public int sumOfLeftLeaves(TreeNode root) {
-    if (root == null) return 0;
-    if (isLeaf(root.left)) return root.left.val + sumOfLeftLeaves(root.right);
-    return sumOfLeftLeaves(root.left) + sumOfLeftLeaves(root.right);
-}
-
-private boolean isLeaf(TreeNode node){
-    if (node == null) return false;
-    return node.left == null && node.right == null;
-}
+```cpp
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        auto ans = 0;
+        if (root->left && !root->left->left && !root->left->right) {
+            ans += root->left->val;
+        }
+        return ans + sumOfLeftLeaves(root->left) + sumOfLeftLeaves(root->right);
+    }
 ```
 
 ### 12. 相同节点值的最大路径长度
@@ -392,23 +446,26 @@ private boolean isLeaf(TreeNode node){
 Output : 2
 ```
 
-```java
-private int path = 0;
-
-public int longestUnivaluePath(TreeNode root) {
-    dfs(root);
-    return path;
-}
-
-private int dfs(TreeNode root){
-    if (root == null) return 0;
-    int left = dfs(root.left);
-    int right = dfs(root.right);
-    int leftPath = root.left != null && root.left.val == root.val ? left + 1 : 0;
-    int rightPath = root.right != null && root.right.val == root.val ? right + 1 : 0;
-    path = Math.max(path, leftPath + rightPath);
-    return Math.max(leftPath, rightPath);
-}
+```cpp
+public:
+    int longestUnivaluePath(TreeNode* root) {
+        dfs(root);
+        return ans;
+    }
+    
+private:
+    int ans = 0;
+    int dfs(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        auto l = dfs(root->left);
+        auto r = dfs(root->right);
+        auto ansL = root->left && (root->left->val == root->val) ? l + 1 : 0;
+        auto ansR = root->right && (root->right->val == root->val) ? r + 1 : 0;
+        ans = max(ans, ansL + ansR);
+        return max(ansL, ansR);
+    }
 ```
 
 ### 13. 间隔遍历
@@ -426,15 +483,22 @@ private int dfs(TreeNode root){
 Maximum amount of money the thief can rob = 3 + 3 + 1 = 7.
 ```
 
-```java
-public int rob(TreeNode root) {
-    if (root == null) return 0;
-    int val1 = root.val;
-    if (root.left != null) val1 += rob(root.left.left) + rob(root.left.right);
-    if (root.right != null) val1 += rob(root.right.left) + rob(root.right.right);
-    int val2 = rob(root.left) + rob(root.right);
-    return Math.max(val1, val2);
-}
+```cpp
+public:
+    int rob(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        auto ans1 = root->val;
+        if (root->left) {
+            ans1 += rob(root->left->left) + rob(root->left->right);
+        }
+        if (root->right) {
+            ans1 += rob(root->right->left) + rob(root->right->right);
+        }
+        auto ans2 = rob(root->left) + rob(root->right);
+        return max(ans1, ans2);
+    }
 ```
 
 ### 14. 找出二叉树中第二小的节点
@@ -456,18 +520,31 @@ Output: 5
 
 一个节点要么具有 0 个或 2 个子节点，如果有子节点，那么根节点是最小的节点。
 
-```java
-public int findSecondMinimumValue(TreeNode root) {
-    if (root == null) return -1;
-    if (root.left == null && root.right == null) return -1;
-    int leftVal = root.left.val;
-    int rightVal = root.right.val;
-    if (leftVal == root.val) leftVal = findSecondMinimumValue(root.left);
-    if (rightVal == root.val) rightVal = findSecondMinimumValue(root.right);
-    if (leftVal != -1 && rightVal != -1) return Math.min(leftVal, rightVal);
-    if (leftVal != -1) return leftVal;
-    return rightVal;
-}
+```cpp
+public:
+    int findSecondMinimumValue(TreeNode* root) {
+        if (!root) {
+            return -1;
+        }
+        if (!root->left && !root->right) {
+            return -1;
+        }
+        auto l = root->left->val;
+        if (root->left->val == root->val) {
+            l = findSecondMinimumValue(root->left);
+        }
+        auto r = root->right->val;
+        if (root->right->val == root->val) {
+            r = findSecondMinimumValue(root->right);
+        }
+        if (l != -1 && r != -1) {
+            return min(l, r);
+        } else if (l != -1) {
+            return l;
+        } else {
+            return r;
+        }
+    }
 ```
 
 ## 层次遍历
